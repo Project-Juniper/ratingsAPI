@@ -6,7 +6,7 @@
 \c ratingsapi;
 
 DROP TABLE IF EXISTS reviews_photos CASCADE;
-DROP TABLE IF EXISTS characteristics_review CASCADE;
+DROP TABLE IF EXISTS characteristic_reviews CASCADE;
 DROP TABLE IF EXISTS characteristics CASCADE;
 DROP TABLE IF EXISTS reviews CASCADE;
 
@@ -14,14 +14,14 @@ CREATE TABLE reviews (
   id INTEGER GENERATED ALWAYS AS IDENTITY NOT NULL PRIMARY KEY,
   product_id INTEGER  NOT NULL,
   rating INTEGER NOT NULL,
-  date TIMESTAMPTZ,
+  date BIGINT NOT NULL,
   summary VARCHAR(150),
   body TEXT,
   recommend BOOLEAN,
   reported BOOLEAN,
-  reviewer_name VARCHAR(20),
-  reviewer_email VARCHAR(50),
-  response BOOLEAN,
+  reviewer_name VARCHAR(100),
+  reviewer_email VARCHAR(100),
+  response TEXT,
   helpfullness INTEGER NOT NULL
 );
 
@@ -35,10 +35,10 @@ CREATE TABLE reviews_photos (
 CREATE TABLE characteristics (
   id INTEGER GENERATED ALWAYS AS IDENTITY NOT NULL PRIMARY KEY,
   product_id INTEGER NOT NULL,
-  name VARCHAR(10)
+  name VARCHAR(50)
 );
 
-CREATE TABLE characteristics_review (
+CREATE TABLE characteristic_reviews (
   id INTEGER GENERATED ALWAYS AS IDENTITY NOT NULL PRIMARY KEY,
   characteristic_id INTEGER REFERENCES characteristics (id),
   review_id INTEGER REFERENCES reviews (id),
