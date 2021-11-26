@@ -1,0 +1,26 @@
+{
+  "name": "ratingsapi",
+  "version": "1.0.0",
+  "description": "Ratings and Reviews API for SDC",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server-dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Project-Juniper/ratingsAPI.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Project-Juniper/ratingsAPI/issues"
+  },
+  "homepage": "https://github.com/Project-Juniper/ratingsAPI#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "pg": "^8.7.1",
+    "postgres": "^1.0.2"
+  }
+}

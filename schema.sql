@@ -2,7 +2,7 @@
 
 -- CREATE DATABASE ratingsapi;
 
--- SET SCHEMA 'ratingsapi';
+-- SET SCHEMA 'ratingsapi';  -> change varchar()
 \c ratingsapi;
 
 DROP TABLE IF EXISTS reviews_photos CASCADE;
@@ -13,18 +13,20 @@ DROP TABLE IF EXISTS reviews CASCADE;
 CREATE TABLE reviews (
   id INTEGER GENERATED ALWAYS AS IDENTITY NOT NULL PRIMARY KEY,
   product_id INTEGER  NOT NULL,
-  rating INTEGER NOT NULL,
+  rating SMALLINT NOT NULL,
   date BIGINT NOT NULL,
-  summary VARCHAR(150),
+  summary TEXT,
   body TEXT,
   recommend BOOLEAN,
-  reported BOOLEAN,
-  reviewer_name VARCHAR(100),
-  reviewer_email VARCHAR(100),
+  reported BOOLEAN DEFAULT FALSE,
+  reviewer_name VARCHAR(40),
+  reviewer_email VARCHAR(40),
   response TEXT,
-  helpfullness INTEGER NOT NULL
+  helpfullness INTEGER DEFAULT 0
 );
 
+CREATE INDEX product_id_idx ON reviews (product_id);
+CREATE INDEX review_id_idx ON reviews_photos (review_id);
 
 CREATE TABLE reviews_photos (
   id INTEGER GENERATED ALWAYS AS IDENTITY NOT NULL PRIMARY KEY,
@@ -35,7 +37,7 @@ CREATE TABLE reviews_photos (
 CREATE TABLE characteristics (
   id INTEGER GENERATED ALWAYS AS IDENTITY NOT NULL PRIMARY KEY,
   product_id INTEGER NOT NULL,
-  name VARCHAR(50)
+  name VARCHAR(20)
 );
 
 CREATE TABLE characteristic_reviews (
@@ -44,5 +46,7 @@ CREATE TABLE characteristic_reviews (
   review_id INTEGER REFERENCES reviews (id),
   value INTEGER NOT NULL
 );
+
+CREATE INDEX characteristic_id_idx ON characteristic_reviews (characteristic_id);
 
 
