@@ -10,11 +10,35 @@ const pool = new Pool({
 //Put helpfulness
 //Post review
 
-var getReviews = function(prodID, callback) {
+var getReviews = function(prodID, count, page, sort, callback) {
+
+  page = page === undefined ? 1 : page;
+  count = count === undefined ? 5 : count;
+  sort = sort === undefined ? 'relevant' : sort;
+
+  let offset = 0;
+  if (page > 1) {
+    offset = count * (page -1);
+  }
+
+  let sortAlgo;
+
+  switch (sort) {
+    case 'newest':
+      sortAlgo = 'date DESC';
+      break;
+    case 'helpful':
+      sortAlgo = 'helpfullness DESC';
+      break;
+    default:
+      sortAlgo = 'helpfullness DESC, date DESC';
+      break;
+  }
 
   // reviews.id, reviews.rating, reviews.summary, reviews.response, reviews.body, reviews.date, reviews.reviewer_name, reviews.helpfullness
-  pool.query('SELECT * FROM reviews WHERE product_id=$1', [prodID], function(err, resultsReviews) {
+  pool.query(`SELECT * FROM reviews WHERE product_id=$1 AND reviews.reported=$2 ORDER BY ${sortAlgo} OFFSET ${offset} LIMIT ${count}`, [prodID, false], function(err, resultsReviews) {
     if (err) {
+      console.log(err);
       callback(err);
     } else {
 
@@ -41,11 +65,15 @@ var getReviews = function(prodID, callback) {
           callback(err);
         } else {
           let results =  resultsReviews.rows;
+          results.product = prodID;
+          results.page = page;
+          results.count = count;
           results.forEach( (aResponse) =>  {
-            aResponse.photo = [];
+            aResponse.photos = [];
+            aResponse.date = new Date(Number(aResponse.date)).toISOString();
             resultsPhotos.rows.forEach((aPhoto) => {
               if (aResponse.id === aPhoto.review_id) {
-                aResponse.photo.push({id: aPhoto.id, url: aPhoto.url});
+                aResponse.photos.push({id: aPhoto.id, url: aPhoto.url});
               }
             })
           })
@@ -106,14 +134,88 @@ var getMetaReviews = (id, callback) => {
       });
 
       console.log('currentresults', results);
-
       callback(null,{results});
     }
   })
 
 }
 
+var postReview = (reqBody, callback) => {
+  const {
+    product_id, rating, recommend, photos, characteristics
+  } = reqBody;
+  let { summary, body, name, email } = reqBody;
+
+  summary = summary.replace(/'/g, "\\'");
+  body = body.replace(/'/g, "\\'");
+  name = name.replace(/'/g, "\\'");
+  email = email.replace(/'/g, "\\'");
+
+
+  let queryString = `INSERT INTO
+  reviews (product_id, rating, date, summary, body, recommend, reviewer_name, reviewer_email)
+  VALUES (${product_id}, ${rating}, ${Date.now()} ,'${summary}', '${body}', ${recommend}, '${name}', '${email}')
+  RETURNING id`;
+
+  pool.query(queryString, (err, results) => {
+    if(err) {
+      console.log(err);
+      callback(err);
+    } else {
+      const currentReviewID = results.rows[0].id;
+      if(Object.keys(characteristics).length > 0) {
+        const constructCharQuery = (characteristics) => {
+          const values = [];
+          for (const key in characteristics) {
+            values.push(`(${key}, ${currentReviewID}, ${characteristics[key]})`);
+          }
+          return values.join(',');
+        }
+        queryString = `INSERT INTO characteristic_reviews (characteristic_id, review_id, value)
+        VALUES ${constructCharQuery(characteristics)}`;
+        pool.query(queryString, (err) => {
+          if (err) {
+            callback(err);
+          } else if (photos.length > 0) {
+            const constructPhotosQuery = (photos) => {
+              const values = [];
+              photos.forEach((url) => {
+                values.push(`(${currentReviewID}, '${url}')`);
+              });
+              return values.join(',');
+            }
+
+            const value = constructPhotosQuery(photos);
+
+            queryString = `INSERT INTO
+              reviews_photos (review_id, url)
+              VALUES ${value}`;
+
+            pool.query(queryString, (err) => {
+              if(err){
+                callback(err);
+              } else {
+                console.log('done!');
+                callback();
+              }
+            });
+          } else {
+            console.log('done!');
+            callback();
+          }
+        });
+      } else {
+        console.log('done!');
+        callback();
+      }
+    }
+
+  })
+
+}
+
 module.exports = {
   getReviews,
-  getMetaReviews
+  getMetaReviews,
+  postReview,
 };
