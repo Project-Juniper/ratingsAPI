@@ -1,6 +1,7 @@
 const { Pool, Client } = require('pg');
 
 const pool = new Pool({
+  host: 'localhost',
   database: 'ratingsapi'
 });
 
@@ -65,19 +66,23 @@ var getReviews = function(prodID, count, page, sort, callback) {
           callback(err);
         } else {
           let results =  resultsReviews.rows;
-          results.product = prodID;
-          results.page = page;
-          results.count = count;
           results.forEach( (aResponse) =>  {
             aResponse.photos = [];
+            aResponse['review_id'] = aResponse.id;
+            aResponse['helpfulness'] = aResponse.helpfullness;
+            delete aResponse.reported;
+            delete aResponse.reviewer_email;
+            delete aResponse.helpfullness;
+            aResponse.response = aResponse.response === 'null' ? null : aResponse.response;
             aResponse.date = new Date(Number(aResponse.date)).toISOString();
             resultsPhotos.rows.forEach((aPhoto) => {
               if (aResponse.id === aPhoto.review_id) {
                 aResponse.photos.push({id: aPhoto.id, url: aPhoto.url});
               }
             })
+            delete aResponse.id;
           })
-        callback(null, {results});
+        callback(null, {'product': prodID, 'page': page, 'count': count, 'results' : results});
         };
     });
   }
@@ -133,7 +138,6 @@ var getMetaReviews = (id, callback) => {
         }
       });
 
-      console.log('currentresults', results);
       callback(null,{results});
     }
   })
@@ -214,8 +218,33 @@ var postReview = (reqBody, callback) => {
 
 }
 
+var addHelpfullness = (reviewID, callback) => {
+
+  pool.query(`UPDATE reviews SET helpfullness = (helpfullness + 1) where id= ${reviewID}`, (err) => {
+    if(err) {
+      console.log(err);
+      callback(err);
+    } else {
+      callback();
+    }
+  });
+}
+
+var reportReview = (reviewID, callback) => {
+  pool.query(`UPDATE reviews SET reported = true WHERE id= ${reviewID}`, (err) => {
+    if(err) {
+      console.log(err);
+      callback(err);
+    } else {
+      callback();
+    }
+  })
+}
+
 module.exports = {
   getReviews,
   getMetaReviews,
   postReview,
+  addHelpfullness,
+  reportReview
 };
