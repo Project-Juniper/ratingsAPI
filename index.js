@@ -5,6 +5,14 @@ const pool = new Pool({
   database: 'ratingsapi'
 });
 
+// const pool = new Pool({
+//   user: 'test_user',
+//   host: '13.56.80.5',
+//   database: 'ratingsapi',
+//   password: 'password',
+//   port: 5432
+// });
+
 //Get reviews
 //Get MetaReviews
 //Put report
@@ -150,16 +158,18 @@ var postReview = (reqBody, callback) => {
   } = reqBody;
   let { summary, body, name, email } = reqBody;
 
-  summary = summary.replace(/'/g, "\\'");
-  body = body.replace(/'/g, "\\'");
-  name = name.replace(/'/g, "\\'");
-  email = email.replace(/'/g, "\\'");
+  summary = summary.replace(`'`, "''");
+  body = body.replace(/'/g, "''");
+  name = name.replace(/'/g, "''");
+  email = email.replace(/'/g, "''");
 
 
   let queryString = `INSERT INTO
   reviews (product_id, rating, date, summary, body, recommend, reviewer_name, reviewer_email)
   VALUES (${product_id}, ${rating}, ${Date.now()} ,'${summary}', '${body}', ${recommend}, '${name}', '${email}')
   RETURNING id`;
+
+  console.log(queryString);
 
   pool.query(queryString, (err, results) => {
     if(err) {
@@ -246,5 +256,6 @@ module.exports = {
   getMetaReviews,
   postReview,
   addHelpfullness,
-  reportReview
+  reportReview,
+  pool,
 };

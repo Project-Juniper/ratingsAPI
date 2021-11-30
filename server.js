@@ -12,10 +12,11 @@ app.use(cors());
 
 
 app.get('/reviews/', (req, res) => {
-  const { page, sort, product_id } = req.query;
-  const url = `${URL}/reviews/?page=${page}&count=100&sort=${sort}&product_id=${product_id}`;
+  const { page, sort, product_id, count } = req.query;
+  console.log('count', count);
+  const url = `${URL}/reviews/?page=${page}&count=${count}&sort=${sort}&product_id=${product_id}`;
 
-  db.getReviews(product_id, 5, page, sort, (err, response) => {
+  db.getReviews(product_id, count, page, sort, (err, response) => {
     if(err) {
       res.status(400).send('Error getting data');
     } else {
@@ -79,3 +80,5 @@ app.put('/reviews/:review_id/report', (req, res) => {
 app.listen(PORT, () => {
  console.log('Server listening on port:', `${PORT}`);
 });
+
+module.exports = { app };

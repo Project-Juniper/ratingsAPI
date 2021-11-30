@@ -1,6 +1,6 @@
--- DROP DATABASE IF EXISTS ratingsapi;
+DROP DATABASE IF EXISTS ratingsapi;
 
--- CREATE DATABASE ratingsapi;
+CREATE DATABASE ratingsapi;
 
 -- SET SCHEMA 'ratingsapi';  -> change varchar()
 \c ratingsapi;
