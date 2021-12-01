@@ -1,17 +1,17 @@
 const { Pool, Client } = require('pg');
 
-const pool = new Pool({
-  host: 'localhost',
-  database: 'ratingsapi'
-});
-
 // const pool = new Pool({
-//   user: 'test_user',
-//   host: '13.56.80.5',
-//   database: 'ratingsapi',
-//   password: 'password',
-//   port: 5432
+//   host: 'localhost',
+//   database: 'ratingsapi'
 // });
+
+const pool = new Pool({
+  user: 'test_user',
+  host: '3.101.115.196',
+  database: 'ratingsapi',
+  password: 'password',
+  port: 5432
+});
 
 //Get reviews
 //Get MetaReviews
