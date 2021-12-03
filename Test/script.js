@@ -14,4 +14,13 @@ export default function script() {
   http.get(`http://localhost:8080/reviews?product_id=${61575}&count=50&sort=newest`);
   sleep(1);
 
+  http.get(`http://localhost:8080/reviews?product_id=${61575}&count=50&sort=relevancy`);
+  sleep(1);
+
+  http.get(`http://localhost:8080/reviews?product_id=${61575}&count=50&sort=helpful`);
+  sleep(1);
+
+  http.get(`http://localhost:8080/reviews/meta?product_id=${61575}`);
+  sleep(1);
+
 };

@@ -4,7 +4,7 @@ const db = require('./index.js');
 const URL = 'localhost:8080';
 
 const app = express();
-const PORT = 8080 || process.env.PORT;
+const PORT = 8080;
 
 app.use(express.json());
 app.use(express.static(__dirname + '/../client/dist'));
@@ -27,6 +27,10 @@ app.get('/reviews/', (req, res) => {
     }
   })
 
+});
+
+app.get('/loaderio-d45d3349f5ae9bcf7fa63faf91d285d1/', (req,res) => {
+  res.send('loaderio-d45d3349f5ae9bcf7fa63faf91d285d1');
 });
 
 app.get('/reviews/meta', (req,res) => {
